@@ -19,6 +19,12 @@ controller.spawn({
 });
 
 
+// EXAMPLE OF USING CALSCRAPE
+// var calscrape = require('./calscrape');
+// calscrape.getArrivalTimes('Bayshore', [156, 264, 274], function(err, times) { console.log('south', times); })
+// calscrape.getArrivalTimes('San Mateo', undefined, function(err, times) { console.log('north', times); })
+
+
 // controller.hears(['hello', 'hi'], ['direct_message', 'direct_mention', 'mention'], function (bot,message) {
 //     bot.reply(message,"Hello.");
 // });
