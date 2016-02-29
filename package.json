@@ -1,0 +1,27 @@
+{
+  "name": "caltrain-bot",
+  "version": "0.0.1",
+  "description": "Keeps people up to date with the Caltrains!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priyalm88/caltrain-bot.git"
+  },
+  "keywords": [
+    "slack",
+    "bot",
+    "caltrain"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/priyalm88/caltrain-bot/issues"
+  },
+  "homepage": "https://github.com/priyalm88/caltrain-bot#readme",
+  "dependencies": {
+    "slack-client": "^2.0.4"
+  }
+}
