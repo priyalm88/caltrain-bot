@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/priyalm88/caltrain-bot#readme",
   "dependencies": {
-    "slack-client": "^2.0.4"
+    "botkit": "0.0.7"
   }
 }
