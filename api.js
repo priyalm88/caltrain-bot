@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var async = require('async');
 var parseString = require('xml2js').parseString;
 var request = require('request');
 
@@ -22,32 +23,34 @@ function getRouteList(obj) {
   return _.get(obj, 'RTT.AgencyList[0].Agency[0].RouteList[0].Route');
 }
 
-function getRoutesForCaltrain() {
+function getRoutesForCaltrain(cb) {
   var url = buildUrl('/GetRoutesForAgency.aspx', {
     agencyName: 'Caltrain'
   });
-  console.log(url);
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
         var xmlResponse = body;
         parseString(xmlResponse, function (err, result) {
-          var routeList = getRouteList(result);
-          var routes = _.find(routeList, function (route) {
-            return _.get(route, '$.Name').toUpperCase() === 'LOCAL';
+          var routes = getRouteList(result).map(function(route) {
+            return {
+              code: route.$.Code,
+              directions: _.map(route.RouteDirectionList[0].RouteDirection, '$.Code')
+            };
           });
-          return _.map(routes.RouteDirectionList[0].RouteDirection, '$.Code');
+          cb(null, routes);
       });
      }
   });
 }
 
-function getStopsForRoute(route) {
+function getStopsForRoute(route, direction, cb) {
   // http://services.my511.org/Transit2.0/GetStopsForRoute.aspx?token=token&routeIDF=Caltrain~LOCAL~NB
   var url = buildUrl('/GetStopsForRoute.aspx', {
-    routeIDF: 'Caltrain~LOCAL~' + route.toUpperCase()
+    routeIDF: ['Caltrain', route, direction].join('~')
   });
   request(url, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (error) { return cb(error); }
+    if (response.statusCode == 200) {
       var xmlResponse = body;
       parseString(xmlResponse, function (err, result) {
         var routeList = getRouteList(result);
@@ -58,10 +61,37 @@ function getStopsForRoute(route) {
             stopCode: _.get(stop, '$.StopCode')
           };
         });
-        console.log(data);
+        cb(null, data);
       });
+    } else {
+      cb(new Error(response.statusCode));
     }
   });
 }
 
-getStopsForRoute('SB3');
+getRoutesForCaltrain(function(err, routes) {
+  async.map(routes, function(route, cb) {
+    async.map(route.directions, function(direction, cb) {
+      getStopsForRoute(route.code, direction, function(err, stops) {
+        if (err) { return cb(err); }
+        cb(null, {
+          direction: direction !== 'NB' ? 'SB' : 'NB',
+          stops: stops
+        });
+      });
+    }, cb);
+  }, function(err, routes) {
+    var stops = routes.reduce(function(acc, stops) {
+      stops.forEach(function(stopList) {
+        stopList.stops.forEach(function(stop) {
+          if (!acc[stop.name]) {
+            acc[stop.name] = {};
+          }
+          acc[stop.name][stopList.direction] = stop.stopCode;
+        });
+      });
+      return acc;
+    }, {});
+    console.log(stops);
+  });
+})
