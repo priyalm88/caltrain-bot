@@ -143,7 +143,7 @@ controller.hears(['Train times to (.*)'],
   }
 );
 
-controller.hears(['Notify me about trains to (.*)'],
+controller.hears(['Next train to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     if (checkStopName(message.match[1]) === -1) {
@@ -158,7 +158,7 @@ controller.hears(['Notify me about trains to (.*)'],
   }
 );
 
-controller.hears(['Next train to (.*)'],
+controller.hears(['Notify me about trains to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
