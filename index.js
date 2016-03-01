@@ -50,24 +50,17 @@ function compareMilli(a, b) {
   return 0;
 }
 
-function sortAsc(trains) {
-  _.forEach(trains, function (train) {
-    train.milli = moment(train.stops[0].arrivalTime, 'HH:mm:ss').valueOf();
-  });
-  return trains.sort(compareMilli);
-}
-
 function formatTrains(trains, destination) {
-  return _.map(sortAsc(trains), function (train) {
+  return _.map(trains, function (train) {
     return [
       'Train',
       train.tripNumber,
       'departing from San Mateo at',
-      train.stops[0].arrivalTime,
-      'and arriving at',
+      train.stops[0].arrivalTime.format('h:mm a'),
+      'and arriving in',
       destination,
       'at',
-      train.stops[1].arrivalTime
+      train.stops[1].arrivalTime.format('h:mm a')
     ].join(' ');
   });
 }
@@ -99,7 +92,10 @@ controller.hears(['Train times to (.*)'],
         trainHelpers.getCodesForTrip('San Mateo', destination, function (err, stopCodes) {
           trainHelpers.getTrainsFor(stopCodes, function (err, trains) {
             var possibleTrains = _.filter(trains, function (train) {
-              return moment().isSameOrBefore(moment(train.stops[0].arrivalTime, 'HH:mm:ss'));
+              var now = moment().subtract(2, 'hour'),
+                arrival = train.stops[0].arrivalTime.clone().subtract(2, 'hour').day(now.day());
+
+              return arrival.isAfter(now);
             });
             if (!possibleTrains.length) {
               bot.say({
@@ -175,7 +171,7 @@ controller.hears(['Notify me about trains to (.*)'],
             train.type,
             'train',
             train.tripNumber,
-            'for',
+            'to',
             destination,
             'leaving in',
             train.wait,
@@ -194,7 +190,7 @@ controller.hears(['Cancel notifications'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
-      convo.say('I`ve cancelled your train notifications.');
+      convo.say('I`ve canceled your train notifications.');
       trainwatch.unwatch(message.user);
     });
   }

@@ -30,7 +30,7 @@ function getArrivalTimes(stationName, tripNumbers, cb) {
     if (err) { return cb(err); }
 
     if (stationCache[stationName] && moment().isBefore(stationCache[stationName].expiration)) {
-      cb(null, filterArrivals(stationCache[stationName].value, tripNumbers))
+      return cb(null, filterArrivals(stationCache[stationName].value, tripNumbers))
     }
 
     request.post({
