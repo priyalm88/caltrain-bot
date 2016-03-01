@@ -3,6 +3,7 @@ var trainHelpers = require('./train');
 var scrape = require('./calscrape');
 var _ = require('lodash');
 var allStopNames = trainHelpers.getStopNames();
+var trainwatch = require('./trainwatch');
 
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
@@ -89,9 +90,11 @@ controller.hears(['help'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
-      convo.say('Hi, here\'s some things you can try:\n' +
-        '1. Train times to <Caltrain stop name>\n' +
-        '2. Next train to <Caltrain stop name>?\n'
+      convo.say(['Hi, here\'s some things you can try:',
+        '1. Train times to <Caltrain stop name>',
+        '2. Next train to <Caltrain stop name>?',
+        '3. Notify me about trains to <Caltrain stop name>',
+        '4. Cancel notifications'].join('\n')
       );
     })
   }
@@ -124,5 +127,47 @@ controller.hears(['Next train to (.*)'],
         convo.say('next train to: ' + message.match[1]);
       });
     }
+  }
+);
+
+controller.hears(['Notify me about trains to (.*)'],
+  ['direct_message', 'direct_mention', 'mention'],
+  function (bot, message) {
+    bot.startConversation(message, function (err, convo) {
+      var destination = message.match[1],
+        stopNames = trainHelpers.getStopNames();
+      if (stopNames.indexOf(destination) === -1) {
+        convo.say(['I`m sorry, I don`t recognize ', destination, '.'].join(''));
+        convo.say('Try one of these destinations: ' + stopNames);
+      } else {
+        convo.say(['I will let you know when trains to', destination, 'are approaching.'].join(' '));
+        trainwatch.watch(message.user, 'San Mateo', destination, function(err, train) {
+          bot.say({
+            text: [
+            train.type,
+            'train',
+            train.tripNumber,
+            'for',
+            destination,
+            'leaving in',
+            train.wait,
+            'minutes.'
+          ].join(' '),
+            channel: message.channel
+          });
+        });
+      }
+    });
+  }
+);
+
+
+controller.hears(['Cancel notifications'],
+  ['direct_message', 'direct_mention', 'mention'],
+  function (bot, message) {
+    bot.startConversation(message, function (err, convo) {
+      convo.say('I`ve cancelled your train notifications.');
+      trainwatch.unwatch(message.user);
+    });
   }
 );

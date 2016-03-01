@@ -2,7 +2,7 @@ var stopTimes = require('./stopTimes');
 var stops = require('./data/stops.json');
 var _ = require('lodash');
 
-function getTrainsFor(stopCodes) {
+function getTrainsFor(stopCodes, cb) {
   var result = [];
   stopTimes(function (data) {
     _.forEach(data, function (trip) {
@@ -17,7 +17,7 @@ function getTrainsFor(stopCodes) {
         });
       }
     });
-    console.log(result);
+    cb(null, result);
   });
 }
 

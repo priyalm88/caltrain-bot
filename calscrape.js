@@ -8,7 +8,7 @@ function getCallbackId(cb) {
   });
 }
 
-function getArrivalTimes(stationName, trainNumbers, cb) {
+function getArrivalTimes(stationName, tripNumbers, cb) {
   getCallbackId(function(err, callbackId) {
     if (err) { return cb(err); }
 
@@ -23,9 +23,9 @@ function getArrivalTimes(stationName, trainNumbers, cb) {
       if (err) { return cb(err); }
 
       var arrivals = parseArrivals(body);
-      if (trainNumbers) {
+      if (tripNumbers) {
         arrivals = arrivals.filter(function(arrival) {
-          return trainNumbers.indexOf(arrival.trainNumber) !== -1;
+          return tripNumbers.indexOf(arrival.tripNumber) !== -1;
         });
       }
 
@@ -56,13 +56,13 @@ function parseTimes($) {
   $('.ipf-st-ip-trains-subtable')
     .each(function(index, element) {
       var types = mapGetText($, $(element).find('.ipf-st-ip-trains-subtable-td-type'));
-      var trainNumbers = mapGetText($, $(element).find('.ipf-st-ip-trains-subtable-td-id'));
+      var tripNumbers = mapGetText($, $(element).find('.ipf-st-ip-trains-subtable-td-id'));
       var times = mapGetText($, $(element).find('.ipf-st-ip-trains-subtable-td-arrivaltime'));
 
       parsedTimes.push(types.map(function(type, index) {
         return {
           type: type,
-          trainNumber: parseInt(trainNumbers[index], 0),
+          tripNumber: parseInt(tripNumbers[index], 0),
           wait: parseInt(times[index].split(' ')[0], 0)
         };
       }));
