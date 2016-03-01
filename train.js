@@ -34,15 +34,10 @@ function getTrips() {
       return todaysTrips.indexOf(stopTime.trip_id) !== -1;
     })
     .map(function (stopTime) {
-      var arrival = stopTime.arrival_time.split(':');
-      if (arrival[0] === '24' && arrival[1] !== '00') {
-        arrival[0] = '00';
-      }
-
       return {
         stopCode: stopTime.stop_id,
         tripNumber: stopTime.trip_id,
-        arrivalTime: moment(arrival.join(':'), 'HH:mm:ss')
+        arrivalTime: parseTime(stopTime.arrival_time)
       }
     })
     .reduce(function(acc, stop) {
@@ -58,6 +53,14 @@ function getTrips() {
     }, {});
 }
 
+function parseTime(time) {
+  // For some reason we get times with the hour of 24 instead of 0.
+  if (time.slice(0, 2) === '24') {
+    return moment(time.slice(3), 'mm:ss').add(1, 'day');
+  } else {
+    return moment(time, 'HH:mm:ss')
+  }
+}
 
 function getTrainsFor(stopCodes, cb) {
   function filterStops(stops) {
@@ -66,8 +69,8 @@ function getTrainsFor(stopCodes, cb) {
        return stopCodes.indexOf(stop.stopCode) !== -1;
       })
       .orderBy(function(stop) {
-        return stop.arrivalTime.valueOf()
-      }, 'desc')
+        return stop.arrivalTime.valueOf();
+      })
       .value();
   }
 
@@ -80,6 +83,9 @@ function getTrainsFor(stopCodes, cb) {
     })
     .filter(function(trip) {
       return trip.stops.length === 2; // Both the stops should be serviced by this train!
+    })
+    .orderBy(function(trip) {
+      return trip.stops[0].arrivalTime.valueOf();
     })
     .value();
 
