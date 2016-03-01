@@ -93,7 +93,7 @@ function parseTimes($) {
       parsedTimes.push(types.map(function(type, index) {
         return {
           type: type,
-          tripNumber: parseInt(tripNumbers[index], 0),
+          tripNumber: tripNumbers[index],
           wait: parseInt(times[index].split(' ')[0], 0)
         };
       }));

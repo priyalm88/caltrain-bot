@@ -139,22 +139,34 @@ controller.hears(['Train times to (.*)'],
   }
 );
 
-controller.hears(['Next train to (.*)'],
+function formatLiveTime(train, destination) {
+  return [train.type, 'train', train.tripNumber, 'to', destination, 'leaving in', train.wait, 'minutes.'].join(' ');
+}
+
+controller.hears(['Next train to (.*)', 'next (.*) train'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
+    var destination = message.match[1];
+
     if (checkStopName(message.match[1]) === -1) {
       bot.startConversation(message, function (err, convo) {
         botErrMessaging(convo, message.match[1]);
       });
     } else {
       bot.startConversation(message, function (err, convo) {
-        convo.say('next train to: ' + message.match[1]);
+        trainwatch.getLiveTrainTimes('San Mateo', destination, function (err, trains) {
+          bot.say({
+            text: trains.map(function(train) { return formatLiveTime(train, destination); }).join('\n'),
+            channel: message.channel
+          })
+          console.log(trains);
+        })
       });
     }
   }
 );
 
-controller.hears(['Notify me about trains to (.*)'],
+controller.hears(['Notify me about trains to (.*)', 'notify (.*) trains'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
@@ -167,16 +179,7 @@ controller.hears(['Notify me about trains to (.*)'],
         convo.say(['I will let you know when trains to', destination, 'are approaching.'].join(' '));
         trainwatch.watch(message.user, 'San Mateo', destination, function(err, train) {
           bot.say({
-            text: [
-            train.type,
-            'train',
-            train.tripNumber,
-            'to',
-            destination,
-            'leaving in',
-            train.wait,
-            'minutes.'
-          ].join(' '),
+            text: formatLiveTime(train, destination),
             channel: message.channel
           });
         });
