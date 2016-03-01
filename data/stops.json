@@ -10,9 +10,29 @@
       "SB":"70022"
    },
    {
+      "name":"Bayshore",
+      "NB":"70031",
+      "SB":"70032"
+   },
+   {
+      "name":"South San Francisco",
+      "NB":"70041",
+      "SB":"70042"
+   },
+   {
+      "name":"San Bruno",
+      "NB":"70051",
+      "SB":"70052"
+   },
+   {
       "name":"Millbrae",
       "NB":"70061",
       "SB":"70062"
+   },
+   {
+      "name":"Burlingame",
+      "NB":"70081",
+      "SB":"70082"
    },
    {
       "name":"San Mateo",
@@ -20,9 +40,24 @@
       "SB":"70092"
    },
    {
+      "name":"Hayward Park",
+      "NB":"70101",
+      "SB":"70102"
+   },
+   {
       "name":"Hillsdale",
       "NB":"70111",
       "SB":"70112"
+   },
+   {
+      "name":"Belmont",
+      "NB":"70121",
+      "SB":"70122"
+   },
+   {
+      "name":"San Carlos",
+      "NB":"70131",
+      "SB":"70132"
    },
    {
       "name":"Redwood City",
@@ -40,61 +75,6 @@
       "SB":"70172"
    },
    {
-      "name":"Mountain View",
-      "NB":"70211",
-      "SB":"70212"
-   },
-   {
-      "name":"Sunnyvale",
-      "NB":"70221",
-      "SB":"70222"
-   },
-   {
-      "name":"San Jose Diridon",
-      "NB":"70261",
-      "SB":"70262"
-   },
-   {
-      "name":"Tamien",
-      "NB":"70271",
-      "SB":"70272"
-   },
-   {
-      "name":"Bayshore",
-      "NB":"70031",
-      "SB":"70032"
-   },
-   {
-      "name":"South San Francisco",
-      "NB":"70041",
-      "SB":"70042"
-   },
-   {
-      "name":"San Bruno",
-      "NB":"70051",
-      "SB":"70052"
-   },
-   {
-      "name":"Burlingame",
-      "NB":"70081",
-      "SB":"70082"
-   },
-   {
-      "name":"Hayward Park",
-      "NB":"70101",
-      "SB":"70102"
-   },
-   {
-      "name":"Belmont",
-      "NB":"70121",
-      "SB":"70122"
-   },
-   {
-      "name":"San Carlos",
-      "NB":"70131",
-      "SB":"70132"
-   },
-   {
       "name":"California Ave",
       "NB":"70191",
       "SB":"70192"
@@ -103,6 +83,16 @@
       "name":"San Antonio",
       "NB":"70201",
       "SB":"70202"
+   },
+   {
+      "name":"Mountain View",
+      "NB":"70211",
+      "SB":"70212"
+   },
+   {
+      "name":"Sunnyvale",
+      "NB":"70221",
+      "SB":"70222"
    },
    {
       "name":"Lawrence",
@@ -118,6 +108,16 @@
       "name":"College Park",
       "NB":"70251",
       "SB":"70252"
+   },
+   {
+      "name":"San Jose",
+      "NB":"70261",
+      "SB":"70262"
+   },
+   {
+      "name":"Tamien",
+      "NB":"70271",
+      "SB":"70272"
    },
    {
       "name":"Capitol",
