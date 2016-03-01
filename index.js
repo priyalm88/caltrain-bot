@@ -1,5 +1,5 @@
 var Botkit = require('botkit');
-var trainHelpers = require('./helpers');
+var trainHelpers = require('./train');
 var scrape = require('./calscrape');
 var _ = require('lodash');
 var allStopNames = trainHelpers.getStopNames();
