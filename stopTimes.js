@@ -3,7 +3,7 @@ var lineReader = require('readline');
 var fs = require('fs');
 
 var stopTimes = [];
-var currentTripObj = {};
+var currentTripObj;
 
 function isNumeric(input) {
   return /^\d+$/.test(input);
