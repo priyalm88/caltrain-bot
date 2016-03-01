@@ -1,12 +1,11 @@
 var calscrape = require('./calscrape.js');
-var helpers = require('./train.js');
 var _ = require('lodash');
 var trainHelpers = require('./train.js');
 var watchers = {};
 
 function watch(user, departureStation, arrivalStation, cb) {
   trainHelpers.getCodesForTrip(departureStation, arrivalStation, function(err, stopCodes) {
-    helpers.getTrainsFor(stopCodes, function(err, trains) {
+    trainHelpers.getTrainsFor(stopCodes, function(err, trains) {
       var tripNumbers = trains.map(function(trip) {
         return parseInt(trip.tripNumber, 0);
       });

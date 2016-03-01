@@ -4,6 +4,7 @@ var scrape = require('./calscrape');
 var _ = require('lodash');
 var allStopNames = trainHelpers.getStopNames();
 var trainwatch = require('./trainwatch');
+var moment = require('moment');
 
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
@@ -29,48 +30,6 @@ controller.spawn({
 // calscrape.getArrivalTimes('San Mateo', undefined, function(err, times) { console.log('north', times); })
 
 
-// controller.hears(['hello', 'hi'], ['direct_message', 'direct_mention', 'mention'], function (bot,message) {
-//     bot.reply(message,"Hello.");
-// });
-
-// controller.hears(['attach'], ['direct_message', 'direct_mention'], function (bot,message) {
-
-//   var attachments = [];
-//   var attachment = {
-//     title: 'This is an attachment',
-//     color: '#FFCC99',
-//     fields: []
-//   };
-
-//   attachment.fields.push({
-//     label: 'Field',
-//     value: 'A longish value',
-//     short: false
-//   });
-
-//   attachment.fields.push({
-//     label: 'Field',
-//     value: 'Value',
-//     short: true
-//   });
-
-//   attachment.fields.push({
-//     label: 'Field',
-//     value: 'Value',
-//     short: true
-//   });
-
-//   attachments.push(attachment);
-
-//   bot.reply(message,{
-//     text: 'See below...',
-//     attachments: attachments
-//   },function (err,resp) {
-//     console.log(err,resp);
-//   });
-// });
-//
-
 function checkStopName(name) {
   return allStopNames.indexOf(name);
 }
@@ -84,6 +43,39 @@ function formattedStopNames() {
 function botErrMessaging(convo, cityName) {
   convo.say('The train does not stop at ' + cityName + ' :disappointed:');
   convo.say('Do you want to go to one of these instead?\n' + formattedStopNames());
+}
+
+// Compare dates to sort
+function compareMilli(a, b) {
+  if (a.milli < b.milli) {
+    return -1;
+  }
+  if (a.milli > b.milli) {
+    return 1;
+  }
+  return 0;
+}
+
+function sortAsc(trains) {
+  _.forEach(trains, function (train) {
+    train.milli = moment(train.stops[0].arrivalTime, 'HH:mm:ss').valueOf();
+  });
+  return trains.sort(compareMilli);
+}
+
+function formatTrains(trains, destination) {
+  return _.map(sortAsc(trains), function (train) {
+    return [
+      'Train',
+      train.tripNumber,
+      'departing from San Mateo at',
+      train.stops[0].arrivalTime,
+      'and arriving at',
+      destination,
+      'at',
+      train.stops[1].arrivalTime
+    ].join(' ');
+  });
 }
 
 controller.hears(['help'],
@@ -103,13 +95,56 @@ controller.hears(['help'],
 controller.hears(['Train times to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
-    if (checkStopName(message.match[1]) === -1) {
+    var destination = message.match[1];
+    if (checkStopName(destination) === -1) {
       bot.startConversation(message, function (err, convo) {
-        botErrMessaging(convo, message.match[1]);
+        botErrMessaging(convo, destination);
       });
     } else {
       bot.startConversation(message, function (err, convo) {
-        convo.say('train times: ' + message.match[1]);
+        trainHelpers.getCodesForTrip('San Mateo', destination, function (err, stopCodes) {
+          trainHelpers.getTrainsFor(stopCodes, function (err, trains) {
+            // console.log(JSON.stringify(trains));
+            var possibleTrains = _.filter(trains, function (train) {
+              return moment().isSameOrBefore(moment(train.stops[0].arrivalTime, 'HH:mm:ss'));
+            });
+            if (!possibleTrains.length) {
+              bot.say({
+                text: 'There are no more trains to ' + destination + ' today',
+                channel: message.channel
+              });
+            } else {
+              var formatted = formatTrains(possibleTrains, destination);
+              bot.say({
+                text: _.take(formatted, 3).join('\n'),
+                channel: message.channel
+              });
+              convo.ask('Do you want to see all the trains?',[
+                {
+                  pattern: bot.utterances.yes,
+                  callback: function(response,convo) {
+                    convo.say(formatted.join('\n'));
+                    convo.next();
+                  }
+                },
+                {
+                  pattern: bot.utterances.no,
+                  callback: function(response,convo) {
+                    convo.say('Perhaps later.');
+                    convo.next();
+                  }
+                },
+                {
+                  default: true,
+                  callback: function(response,convo) {
+                    convo.say('Perhaps later.');
+                    convo.next();
+                  }
+                }
+              ]);
+            }
+          });
+        });
       });
     }
   }
