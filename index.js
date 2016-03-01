@@ -1,5 +1,8 @@
 var Botkit = require('botkit');
-
+var trainHelpers = require('./helpers');
+var scrape = require('./calscrape');
+var _ = require('lodash');
+var allStopNames = trainHelpers.getStopNames();
 
 if (!process.env.token) {
   console.log('Error: Specify token in environment');
@@ -66,13 +69,18 @@ controller.spawn({
 //   });
 // });
 //
+
+function checkStopName(name) {
+  return allStopNames.indexOf(name);
+}
+
 controller.hears(['help'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
-      convo.say('Hi' + message.user + ', here\'s some things you can try:\n' +
+      convo.say('Hi, here\'s some things you can try:\n' +
         '1. Train times to <Caltrain stop name>\n' +
-        '2. When is the next train to <Caltrain stop name>?\n'
+        '2. Next train to <Caltrain stop name>?\n'
       );
     })
   }
@@ -81,17 +89,29 @@ controller.hears(['help'],
 controller.hears(['Train times to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
-    bot.startConversation(message, function (err, convo) {
-      convo.say('train times: ' + message.match[1]);
-    });
+    if (checkStopName(message.match[1]) === -1) {
+      bot.startConversation(message, function (err, convo) {
+        convo.say('The train does not stop at ' + message.match[1] + ' :disappointed:');
+      });
+    } else {
+      bot.startConversation(message, function (err, convo) {
+        convo.say('train times: ' + message.match[1]);
+      });
+    }
   }
 );
 
-controller.hears(['When is the next train to (.*)?'],
+controller.hears(['Next train to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
-    bot.startConversation(message, function (err, convo) {
-      convo.say('first train: ' + message.match[1]);
-    });
+    if (checkStopName(message.match[1]) === -1) {
+      bot.startConversation(message, function (err, convo) {
+        convo.say('The train does not stop at ' + message.match[1] + ' :disappointed:');
+      });
+    } else {
+      bot.startConversation(message, function (err, convo) {
+        convo.say('next train to: ' + message.match[1]);
+      });
+    }
   }
 );
