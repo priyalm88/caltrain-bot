@@ -1,37 +1,68 @@
 var request = require('request');
 var cheerio = require('cheerio');
+var moment  = require('moment');
 
-function getCallbackId(cb) {
+var callbackIdCache;
+var stationCache = {};
+
+function getCallbackId(ignoreCache, cb) {
+  if (!ignoreCache && callbackIdCache && moment().isBefore(callbackIdCache.expiration)) {
+    return cb(null, callbackIdCache.value);
+  }
+
   request.get('http://www.caltrain.com/schedules/realtime.html', function(err, response, body) {
-    var callerIdIndex = body.indexOf('ipjstCallerId');
-    cb(null, body.slice(callerIdIndex + 13, callerIdIndex + 26).split('"')[1]);
+    if (err) { return cb(err); }
+
+    var callbackIdIndex = body.indexOf('ipjstCallerId'),
+      callbackId = body.slice(callbackIdIndex + 13, callbackIdIndex + 26).split('"')[1];
+
+    callbackIdCache = {
+      value: callbackId,
+      expiration: moment().add(5, 'minutes')
+    };
+
+    cb(null, callbackId);
   });
 }
 
 function getArrivalTimes(stationName, tripNumbers, cb) {
-  getCallbackId(function(err, callbackId) {
+  getCallbackId(false, function(err, callbackId) {
     if (err) { return cb(err); }
+
+    if (stationCache[stationName] && moment().isBefore(stationCache[stationName].expiration)) {
+      cb(null, filterArrivals(stationCache[stationName].value, tripNumbers))
+    }
 
     request.post({
       url: 'http://www.caltrain.com/schedules/realtime.html',
       form: {
         '__CALLBACKID': callbackId,
-        '__CALLBACKPARAM': 'refreshStation=' + stationName, // @todo plus stationName
+        '__CALLBACKPARAM': 'refreshStation=' + stationName,
         '__EVENTTARGET': '',
       }
     }, function(err, response, body) {
       if (err) { return cb(err); }
 
       var arrivals = parseArrivals(body);
-      if (tripNumbers) {
-        arrivals = arrivals.filter(function(arrival) {
-          return tripNumbers.indexOf(arrival.tripNumber) !== -1;
-        });
-      }
 
-      cb(null, arrivals);
+      stationCache[stationName] = {
+        value: arrivals,
+        expiration: moment().add(1, 'minutes')
+      };
+
+      cb(null, filterArrivals(arrivals, tripNumbers));
     });
   });
+}
+
+function filterArrivals(arrivals, tripNumbers) {
+  if (tripNumbers) {
+    return arrivals.filter(function(arrival) {
+      return tripNumbers.indexOf(arrival.tripNumber) !== -1;
+    });
+  } else {
+    return arrivals;
+  }
 }
 
 function parseArrivals(body) {

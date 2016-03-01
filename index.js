@@ -1,6 +1,5 @@
 var Botkit = require('botkit');
 var trainHelpers = require('./train');
-var scrape = require('./calscrape');
 var _ = require('lodash');
 var allStopNames = trainHelpers.getStopNames();
 var trainwatch = require('./trainwatch');
@@ -22,13 +21,6 @@ controller.spawn({
     throw new Error(err);
   }
 });
-
-
-// EXAMPLE OF USING CALSCRAPE
-// var calscrape = require('./calscrape');
-// calscrape.getArrivalTimes('Bayshore', [156, 264, 274], function(err, times) { console.log('south', times); })
-// calscrape.getArrivalTimes('San Mateo', undefined, function(err, times) { console.log('north', times); })
-
 
 function checkStopName(name) {
   return allStopNames.indexOf(name);
