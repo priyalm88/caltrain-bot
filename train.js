@@ -2,12 +2,12 @@ var stopTimes = require('./stopTimes');
 var stops = require('./data/stops.json');
 var _ = require('lodash');
 
-function getTrainsFor(departCode, arrivalCode) {
+function getTrainsFor(stopCodes) {
   var result = [];
   stopTimes(function (data) {
     _.forEach(data, function (trip) {
       var stopsArray = _.filter(trip.stops, function (stop) {
-        return stop.stopCode === departCode || stop.stopCode === arrivalCode;
+        return stopCodes.indexOf(stop.stopCode) !== -1;;
       });
       // Both the stops should be serviced by this train!
       if (stopsArray.length === 2) {
@@ -19,10 +19,6 @@ function getTrainsFor(departCode, arrivalCode) {
     });
     console.log(result);
   });
-}
-
-function getTrainsFromSanMateoTo(arrivalCode) {
-  getTrainsFor('70091', arrivalCode);
 }
 
 function getCodesForTrip(departureStation, arrivalStation, cb) {
@@ -48,7 +44,7 @@ function getStopNames() {
 }
 
 module.exports = {
-  getTrainsFromSanMateoTo: getTrainsFromSanMateoTo,
+  getTrainsFor: getTrainsFor,
   getCodesForTrip: getCodesForTrip,
   getStopNames: getStopNames
 };
