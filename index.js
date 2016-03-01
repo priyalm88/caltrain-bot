@@ -23,7 +23,9 @@ controller.spawn({
 });
 
 function checkStopName(name) {
-  return allStopNames.indexOf(name);
+  return _.some(allStopNames, function (stopName) {
+    return stopName.toUpperCase() === name.toUpperCase();
+  });
 }
 
 function formattedStopNames() {
@@ -96,7 +98,6 @@ controller.hears(['Train times to (.*)'],
       bot.startConversation(message, function (err, convo) {
         trainHelpers.getCodesForTrip('San Mateo', destination, function (err, stopCodes) {
           trainHelpers.getTrainsFor(stopCodes, function (err, trains) {
-            // console.log(JSON.stringify(trains));
             var possibleTrains = _.filter(trains, function (train) {
               return moment().isSameOrBefore(moment(train.stops[0].arrivalTime, 'HH:mm:ss'));
             });

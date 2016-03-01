@@ -23,7 +23,7 @@ function getTrainsFor(stopCodes, cb) {
 
 function getCodesForTrip(departureStation, arrivalStation, cb) {
   var foundStops = stops.filter(function(stop) {
-    return [departureStation, arrivalStation].indexOf(stop.name) !== -1;
+    return [departureStation.toUpperCase(), arrivalStation.toUpperCase()].indexOf(stop.name.toUpperCase()) !== -1;
   });
 
   if (foundStops.length !== 2) {
