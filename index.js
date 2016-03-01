@@ -74,6 +74,17 @@ function checkStopName(name) {
   return allStopNames.indexOf(name);
 }
 
+function formattedStopNames() {
+  return _.map(_.chunk(allStopNames, 5), function (chunk) {
+    return chunk.join('\t');
+  }).join('\n');
+}
+
+function botErrMessaging(convo, cityName) {
+  convo.say('The train does not stop at ' + cityName + ' :disappointed:');
+  convo.say('Do you want to go to one of these instead?\n' + formattedStopNames());
+}
+
 controller.hears(['help'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
@@ -91,7 +102,7 @@ controller.hears(['Train times to (.*)'],
   function (bot, message) {
     if (checkStopName(message.match[1]) === -1) {
       bot.startConversation(message, function (err, convo) {
-        convo.say('The train does not stop at ' + message.match[1] + ' :disappointed:');
+        botErrMessaging(convo, message.match[1]);
       });
     } else {
       bot.startConversation(message, function (err, convo) {
@@ -106,7 +117,7 @@ controller.hears(['Next train to (.*)'],
   function (bot, message) {
     if (checkStopName(message.match[1]) === -1) {
       bot.startConversation(message, function (err, convo) {
-        convo.say('The train does not stop at ' + message.match[1] + ' :disappointed:');
+        botErrMessaging(convo, message.match[1]);
       });
     } else {
       bot.startConversation(message, function (err, convo) {
