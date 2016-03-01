@@ -115,7 +115,7 @@ controller.hears(['Train times to (.*)'],
   }
 );
 
-controller.hears(['Next train to (.*)'],
+controller.hears(['Notify me about trains to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     if (checkStopName(message.match[1]) === -1) {
@@ -130,16 +130,16 @@ controller.hears(['Next train to (.*)'],
   }
 );
 
-controller.hears(['Notify me about trains to (.*)'],
+controller.hears(['Next train to (.*)'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
     bot.startConversation(message, function (err, convo) {
-      var destination = message.match[1],
-        stopNames = trainHelpers.getStopNames();
-      if (stopNames.indexOf(destination) === -1) {
-        convo.say(['I`m sorry, I don`t recognize ', destination, '.'].join(''));
-        convo.say('Try one of these destinations: ' + stopNames);
-      } else {
+      var destination = message.match[1];
+      if (checkStopName(destination) === -1) {
+      bot.startConversation(message, function (err, convo) {
+        botErrMessaging(convo, destination);
+      });
+    } else {
         convo.say(['I will let you know when trains to', destination, 'are approaching.'].join(' '));
         trainwatch.watch(message.user, 'San Mateo', destination, function(err, train) {
           bot.say({
