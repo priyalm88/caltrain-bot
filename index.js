@@ -65,16 +65,33 @@ controller.spawn({
 //     console.log(err,resp);
 //   });
 // });
-
-controller.hears(['train times', 'train time'],
+//
+controller.hears(['help'],
   ['direct_message', 'direct_mention', 'mention'],
   function (bot, message) {
-    bot.startConversation(message,function (err,convo) {
-      convo.say('Sending you train times privately');
-    });
+    bot.startConversation(message, function (err, convo) {
+      convo.say('Hi' + message.user + ', here\'s some things you can try:\n' +
+        '1. Train times to <Caltrain stop name>\n' +
+        '2. When is the next train to <Caltrain stop name>?\n'
+      );
+    })
+  }
+);
 
-    bot.startPrivateConversation(message,function (err,dm) {
-      dm.say('Here are the train times');
+controller.hears(['Train times to (.*)'],
+  ['direct_message', 'direct_mention', 'mention'],
+  function (bot, message) {
+    bot.startConversation(message, function (err, convo) {
+      convo.say('train times: ' + message.match[1]);
     });
+  }
+);
 
-});
+controller.hears(['When is the next train to (.*)?'],
+  ['direct_message', 'direct_mention', 'mention'],
+  function (bot, message) {
+    bot.startConversation(message, function (err, convo) {
+      convo.say('first train: ' + message.match[1]);
+    });
+  }
+);
